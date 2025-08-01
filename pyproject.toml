@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "aegis-bot"
+version = "0.1.0"
+description = "Secure Telegram support chat bot using Topics"
+authors = ["Relayn <aleksnovop@gmail.com>"]
+readme = "README.md"
+packages = [{include = "app"}]
+
+[tool.poetry.dependencies]
+python = ">=3.11,<3.14"
+aiogram = "^3.21.0"
+pydantic = "^2.11.7"
+pydantic-settings = "^2.10.1"
+sqlmodel = "^0.0.24"
+
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.12.7"
+black = "^25.1.0"
+pytest = "^8.4.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

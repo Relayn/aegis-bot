@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+
+# Poetry
+.poetry/
+
+# IDEs and editors
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Secrets - DO NOT COMMIT
+.env
+.env.*
+!.env.example
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
+
+# Testing
+.pytest_cache/
+coverage.xml
+htmlcov/
