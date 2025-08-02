@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  bot:
+    build: .
+    container_name: aegis_bot
+    # Перезапускать контейнер в случае сбоя
+    restart: unless-stopped
+    # Подключаем .env файл для передачи переменных окружения
+    env_file:
+      - .env
+    # Монтируем базу данных как volume, чтобы она не удалялась при перезапуске контейнера
+    volumes:
+      - ./aegis_bot.db:/app/aegis_bot.db
