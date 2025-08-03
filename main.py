@@ -10,10 +10,11 @@ from aiogram.types.error_event import ErrorEvent
 from app.core.config import settings
 from app.db.session import create_db_and_tables, get_session
 from app.handlers import agent_handlers, user_handlers
+from app.middlewares.db_middleware import DbSessionMiddleware
 from app.services.agent_service import sync_agents_from_env
 
 
-def on_startup(bot: Bot):
+def on_startup():
     """Выполняется при старте бота."""
     logging.info("Initializing database and tables...")
     create_db_and_tables()
@@ -32,7 +33,6 @@ async def error_handler(event: ErrorEvent, bot: Bot):
     logging.error(f"Unhandled exception: {event.exception}", exc_info=True)
 
     # Отправляем сообщение пользователю, если это возможно
-    # event.update содержит объект Update, из которого можно извлечь пользователя
     if event.update.message:
         user_id = event.update.message.from_user.id
         try:
@@ -47,33 +47,29 @@ async def error_handler(event: ErrorEvent, bot: Bot):
 
 async def main() -> None:
     """Главная функция для запуска бота."""
-    # Инициализация бота
     bot = Bot(
         token=settings.BOT_TOKEN.get_secret_value(),
         default=DefaultBotProperties(parse_mode=ParseMode.HTML),
     )
-
-    # Инициализация диспетчера
     dp = Dispatcher()
 
-    # Регистрация событий жизненного цикла
-    dp.startup.register(on_startup)
+    dp.update.middleware(DbSessionMiddleware())
 
-    # Регистрация хэндлеров и роутеров
+    # ПРАВИЛЬНЫЙ СПОСОБ РЕГИСТРАЦИИ:
+    # Используем lambda, чтобы передать объект bot в on_startup.
+    dp.startup.register(on_startup)
+    # Просто регистрируем хэндлер, aiogram сам внедрит зависимость bot.
+    dp.errors.register(error_handler)
+
     dp.include_router(user_handlers.router)
     dp.include_router(agent_handlers.router)
 
-    # Регистрация глобального обработчика ошибок
-    dp.errors.register(error_handler, bot=bot)
-
     logging.info("Starting bot...")
-    # Удаляем вебхук и запускаем long polling
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)
 
 
 if __name__ == "__main__":
-    # Настройка базового логирования
     logging.basicConfig(
         level=logging.INFO,
         stream=sys.stdout,

@@ -1,0 +1,31 @@
+# Git
+.git
+.gitignore
+
+# Docker
+.dockerignore
+Dockerfile
+docker-compose.yml
+
+# Python / Poetry local artifacts
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# IDE / OS
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Документация и конфигурация разработки
+README.md
+TASK.md
+Planning.md
+.pre-commit-config.yaml
+LICENSE
+
+# Тесты
+tests/

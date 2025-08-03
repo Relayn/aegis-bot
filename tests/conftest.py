@@ -14,4 +14,7 @@ def session_fixture():
     SQLModel.metadata.create_all(engine)
     with Session(engine) as session:
         yield session
+
+    # Удаляем таблицы и явно закрываем соединение с БД
     SQLModel.metadata.drop_all(engine)
+    engine.dispose()

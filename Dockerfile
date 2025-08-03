@@ -13,7 +13,7 @@ COPY poetry.lock pyproject.toml ./
 
 # Устанавливаем зависимости проекта, не включая dev-зависимости
 # --no-root говорит Poetry не устанавливать сам проект как пакет
-RUN poetry install --no-dev --no-root
+RUN poetry install --without dev --no-root
 
 # Копируем весь остальной код приложения
 COPY . .

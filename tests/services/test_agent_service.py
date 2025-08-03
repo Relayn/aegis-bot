@@ -1,7 +1,7 @@
 from sqlmodel import Session
 
 from app.models.models import SupportAgent
-from app.services.agent_service import find_available_agent
+from app.services.agent_service import find_available_agent, sync_agents_from_env
 
 
 # --- Тесты для функции find_available_agent ---
@@ -102,3 +102,42 @@ def test_find_available_agent_selects_only_one(session: Session):
     other_agent_id = 1 if found_agent.telegram_id == 2 else 2
     other_agent_in_db = session.get(SupportAgent, other_agent_id)
     assert other_agent_in_db.is_available is True
+
+
+# --- Тесты для функции sync_agents_from_env ---
+
+
+def test_sync_agents_adds_new(session: Session, mocker):
+    """Тест: `sync_agents_from_env` корректно добавляет новых агентов."""
+    # Arrange
+    mocker.patch("app.services.agent_service.settings.AGENT_IDS", [123, 456])
+
+    # Act
+    sync_agents_from_env(session)
+
+    # Assert
+    agent1 = session.get(SupportAgent, 123)
+    agent2 = session.get(SupportAgent, 456)
+    assert agent1 is not None
+    assert agent2 is not None
+    assert agent1.is_active is True
+    assert agent2.is_active is True
+
+
+def test_sync_agents_deactivates_removed(session: Session, mocker):
+    """Тест: `sync_agents_from_env` деактивирует удаленных из .env агентов."""
+    # Arrange
+    existing_agent = SupportAgent(telegram_id=123, is_active=True)
+    session.add(existing_agent)
+    session.commit()
+    mocker.patch("app.services.agent_service.settings.AGENT_IDS", [456])  # 123 удален
+
+    # Act
+    sync_agents_from_env(session)
+
+    # Assert
+    deactivated_agent = session.get(SupportAgent, 123)
+    new_agent = session.get(SupportAgent, 456)
+    assert deactivated_agent.is_active is False
+    assert new_agent is not None
+    assert new_agent.is_active is True
